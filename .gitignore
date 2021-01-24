@@ -1,0 +1,9 @@
+# OS / program files
+.DS_Store
+*.sublime-*
+
+# node
+node_modules
+
+# generated files
+rp-katex.js
