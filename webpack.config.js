@@ -2,7 +2,7 @@ const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-  entry: `${__dirname}/src/index.ts`,
+  entry: `${__dirname}/src/rp-katex.tsx`,
   output: {
     filename: "rp-katex.js",
     path: __dirname,

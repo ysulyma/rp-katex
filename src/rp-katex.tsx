@@ -1,26 +1,28 @@
 /// <reference types="katex" />
-import * as EventEmitter from "events";
+
 import * as React from "react";
-import {ReactChild, ReactNode} from "react";
-import * as matchAll from "string.prototype.matchall";
+import {forwardRef, useEffect,useImperativeHandle, useMemo, useRef} from "react";
+
+import {usePlayer} from "ractive-player";
 
 declare global {
-  var katex: typeof katex;
+  const katex: typeof katex;
 }
 
-const KaTeXLoad = new Promise<typeof katex>((resolve, reject) => {
+// option of loading KaTeX asynchronously
+const KaTeXLoad = new Promise<typeof katex>((resolve) => {
   const script = document.getElementById("js-async-katex") as HTMLScriptElement;
   if (!script) return;
 
   if (window.hasOwnProperty("katex")) {
     resolve(katex);
-    // MathJax.Hub.Register.StartupHook("LoadHead Ready", () => resolve(MathJax));
   } else {
     script.addEventListener("load", () => resolve(katex));
   }
 });
 
-const KaTeXMacros = new Promise<{[key: string]: string;}>((resolve, reject) => {
+// load macros from <head>
+const KaTeXMacros = new Promise<{[key: string]: string;}>((resolve) => {
   const macros: {[key: string]: string;} = {};
   const scripts: HTMLScriptElement[] = Array.from(document.querySelectorAll("head > script[type='math/tex']"));
   return Promise.all(
@@ -38,11 +40,11 @@ const KaTeXMacros = new Promise<{[key: string]: string;}>((resolve, reject) => {
   ).then(() => resolve(macros));
 });
 
-export const KaTeXReady = Promise.all([KaTeXLoad, KaTeXMacros]);
+// ready Promise
+const KaTeXReady = Promise.all([KaTeXLoad, KaTeXMacros]);
 
 interface Props extends React.HTMLAttributes<HTMLSpanElement> {
   display?: boolean;
-  // renderer?: "HTML-CSS" | "CommonHTML" | "PreviewHTML" | "NativeMML" | "SVG" | "PlainSource";
 }
 
 interface Handle {
@@ -50,22 +52,25 @@ interface Handle {
   ready: Promise<void>;
 }
 
+// blocking version
 const implementation: React.RefForwardingComponent<Handle, Props> = function KTX(props, ref) {
   const spanRef = React.useRef<HTMLSpanElement>();
   const {children, display, ...attrs} = props;
-  const resolveRef = React.useRef<() => void>();
-  const ready = React.useMemo(() => {
-    return new Promise<void>((resolve, reject) => {
+  const resolveRef = useRef<() => void>();
+
+  const ready = useMemo(() => {
+    return new Promise<void>((resolve) => {
       resolveRef.current = resolve;
     });
   }, []);
 
-  React.useImperativeHandle(ref, () => ({
+  // handle
+  useImperativeHandle(ref, () => ({
     domElement: spanRef.current,
     ready
   }));
 
-  React.useEffect(() => {
+  useEffect(() => {
     KaTeXReady.then(([katex, macros]) => {
       katex.render(children.toString(), spanRef.current, {
         displayMode: !!display,
@@ -89,8 +94,13 @@ const implementation: React.RefForwardingComponent<Handle, Props> = function KTX
     <span {...attrs} ref={spanRef}/>
   );
 };
-export const KTX = React.forwardRef(implementation);
 
+const KTXNonBlocking = React.forwardRef(implementation);
+
+/**
+Parse \newcommand macros in a file.
+Also supports \ktxnewcommand (for use in conjunction with MathJax).
+*/
 function parseMacros(file: string) {
   const macros = {};
   const rgx = /\\(?:ktx)?newcommand\{(.+?)\}(?:\[\d+\])?\{/g;
@@ -118,6 +128,40 @@ function parseMacros(file: string) {
       body += char;
     }
     macros[macro] = body;
-  };
+  }
   return macros;
 }
+
+// blocking version
+const KTXBlocking = forwardRef(function KTX(
+  props: React.ComponentProps<typeof KTXNonBlocking>,
+  ref: React.MutableRefObject<React.ElementRef<typeof KTXNonBlocking>>
+) {
+  const player = usePlayer();
+  const innerRef = useRef<React.ElementRef<typeof KTXNonBlocking>>();
+  if (ref) {
+    ref.current = innerRef.current;
+  }
+
+  /* obstruction nonsense */
+  const resolve = useRef(null);
+  useMemo(() => {
+    const promise = new Promise((res) => {
+      resolve.current = res;
+    });
+    player.obstruct("canplay", promise);
+    player.obstruct("canplaythrough", promise);
+  }, []);
+
+  useEffect(() => {
+    if (ref) {
+      ref.current = innerRef.current;
+    }
+    innerRef.current.ready.then(() => resolve.current());
+  }, []);
+
+  return (<KTXNonBlocking ref={innerRef} {...props}/>);
+});
+
+// exports
+export {KTXBlocking as KTX, KTXBlocking, KTXNonBlocking, KaTeXReady};
