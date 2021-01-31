@@ -4,8 +4,7 @@
   "description": "KaTeX plugin for ractive-player",
   "files": [
     "rp-katex.js",
-    "rp-katex.d.ts",
-    "style.css"
+    "rp-katex.d.ts"
   ],
   "main": "rp-katex.js",
   "typings": "rp-katex.d.ts",
