@@ -6,7 +6,7 @@ module.exports = {
   output: {
     filename: "rp-katex.js",
     path: __dirname,
-    library: "RPPrompt",
+    library: "RPKaTeX",
     libraryTarget: "umd"
   },
 

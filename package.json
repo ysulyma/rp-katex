@@ -10,6 +10,7 @@
   "main": "rp-katex.js",
   "typings": "rp-katex.d.ts",
   "author": "Yuri Sulyma <yuri@ractive-player.org>",
+  "keywords": ["ractive-player", "katex"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ysulyma/rp-katex.git"
