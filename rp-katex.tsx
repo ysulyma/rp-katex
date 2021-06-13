@@ -11,7 +11,7 @@ declare global {
 
 // option of loading KaTeX asynchronously
 const KaTeXLoad = new Promise<typeof katex>((resolve) => {
-  const script = document.getElementById("js-async-katex") as HTMLScriptElement;
+  const script = document.querySelector(`script[src*="katex.js"], script[src*="katex.min.js"]`);
   if (!script) return;
 
   if (window.hasOwnProperty("katex")) {
