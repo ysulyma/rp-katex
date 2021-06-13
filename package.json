@@ -1,6 +1,6 @@
 {
   "name": "rp-katex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "KaTeX plugin for ractive-player",
   "files": [
     "rp-katex.js",

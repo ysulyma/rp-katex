@@ -1,6 +1,6 @@
 # rp-katex
 
-[KaTeX](https://katex.org/) plugin for [ractive-player](https://www.npmjs.com/package/ractive-player).
+[KaTeX](https://katex.org/) plugin for [ractive-player](https://ractive-player.org).
 
 ## Usage
 
@@ -15,4 +15,17 @@ function Quadratic() {
     </div>
   );
 }
+```
+
+## Macros
+
+For convenience, this module supports loading macro definitions from a file. Simply include a `<script type="math/tex">` tag in the `<head>` of your html, pointing to a tex file containing `\newcommand`s.
+
+```html
+<!-- this has to go in <head> -->
+<script src="./macros.tex" type="math/tex"></script>
+```
+```tex
+% macros.tex
+\newcommand{\C}{\mathbb C}
 ```
