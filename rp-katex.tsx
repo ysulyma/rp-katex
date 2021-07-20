@@ -3,7 +3,7 @@
 import * as React from "react";
 import {forwardRef, useEffect,useImperativeHandle, useMemo, useRef} from "react";
 
-import {usePlayer} from "ractive-player";
+import {usePlayer} from "liqvid";
 
 declare global {
   const katex: typeof katex;
@@ -47,7 +47,7 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
   display?: boolean;
 }
 
-interface Handle {
+export interface Handle {
   domElement: HTMLSpanElement;
   ready: Promise<void>;
 }
@@ -79,6 +79,19 @@ const implementation: React.RefForwardingComponent<Handle, Props> = function KTX
         throwOnError: false,
         trust: true
       });
+
+      // move katex into placeholder element
+      const child = spanRef.current.firstElementChild as HTMLSpanElement;
+      for (let i = 0, len = child.classList.length; i < len; ++i) {
+        spanRef.current.classList.add(child.classList.item(i));
+      }
+
+      while (child.childNodes.length > 0) {
+        spanRef.current.appendChild(child.firstChild);
+      }
+      child.remove();
+
+      // resolve promise
       resolveRef.current();
     });
   }, [children]);
@@ -95,7 +108,7 @@ const implementation: React.RefForwardingComponent<Handle, Props> = function KTX
   );
 };
 
-const KTXNonBlocking = React.forwardRef(implementation);
+const KTXNonBlocking = forwardRef(implementation);
 
 /**
 Parse \newcommand macros in a file.
@@ -133,13 +146,12 @@ function parseMacros(file: string) {
 }
 
 // blocking version
-const KTXBlocking = forwardRef(function KTX(
-  props: React.ComponentProps<typeof KTXNonBlocking>,
-  ref: React.MutableRefObject<React.ElementRef<typeof KTXNonBlocking>>
-) {
+const KTXBlocking = forwardRef<Handle, typeof KTXNonBlocking>(function KTX(props, ref) {
   const player = usePlayer();
   const innerRef = useRef<React.ElementRef<typeof KTXNonBlocking>>();
-  if (ref) {
+  if (typeof ref === "function") {
+    ref(innerRef.current);
+  } else if (ref) {
     ref.current = innerRef.current;
   }
 
@@ -154,7 +166,9 @@ const KTXBlocking = forwardRef(function KTX(
   }, []);
 
   useEffect(() => {
-    if (ref) {
+    if (typeof ref === "function") {
+      ref(innerRef.current);
+    } else if (ref) {
       ref.current = innerRef.current;
     }
     innerRef.current.ready.then(() => resolve.current());
