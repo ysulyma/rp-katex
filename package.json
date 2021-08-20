@@ -1,16 +1,16 @@
 {
   "name": "rp-katex",
   "version": "1.1.0",
-  "description": "KaTeX plugin for ractive-player",
+  "description": "KaTeX plugin for Liqvid",
   "files": [
     "rp-katex.js",
     "rp-katex.d.ts"
   ],
   "main": "rp-katex.js",
   "typings": "rp-katex.d.ts",
-  "author": "Yuri Sulyma <yuri@ractive-player.org>",
+  "author": "Yuri Sulyma <yuri@liqvidjs.org>",
   "keywords": [
-    "ractive-player",
+    "liqvid",
     "katex"
   ],
   "repository": {

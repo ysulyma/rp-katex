@@ -1,6 +1,6 @@
 # rp-katex
 
-[KaTeX](https://katex.org/) plugin for [ractive-player](https://ractive-player.org).
+[KaTeX](https://katex.org/) plugin for [Liqvid](https://liqvidjs.org).
 
 ## Usage
 
