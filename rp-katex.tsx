@@ -1,5 +1,3 @@
-/// <reference types="katex" />
-
 import * as React from "react";
 import {forwardRef, useEffect,useImperativeHandle, useMemo, useRef} from "react";
 
@@ -146,7 +144,7 @@ function parseMacros(file: string) {
 }
 
 // blocking version
-const KTXBlocking = forwardRef<Handle, typeof KTXNonBlocking>(function KTX(props, ref) {
+const KTXBlocking = forwardRef<Handle, Props>(function KTX(props, ref) {
   const player = usePlayer();
   const innerRef = useRef<React.ElementRef<typeof KTXNonBlocking>>();
   if (typeof ref === "function") {
